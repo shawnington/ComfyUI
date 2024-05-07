@@ -1456,13 +1456,12 @@ class LoadImage:
     FUNCTION = "load_image"
     def load_image(self, image):
         image_path = folder_paths.get_annotated_filepath(image)
-        
-        img = node_helpers.open_image(image_path)
+        img = node_helpers.pillow(Image.open, image_path)
         
         output_images = []
         output_masks = []
         for i in ImageSequence.Iterator(img):
-            i = ImageOps.exif_transpose(i)
+            i = node_helpers.pillow(ImageOps.exif_transpose, i)
             if i.mode == 'I':
                 i = i.point(lambda i: i * (1 / 255))
             image = i.convert("RGB")
@@ -1517,8 +1516,8 @@ class LoadImageMask:
     FUNCTION = "load_image"
     def load_image(self, image, channel):
         image_path = folder_paths.get_annotated_filepath(image)
-        i = Image.open(image_path)
-        i = ImageOps.exif_transpose(i)
+        i = node_helpers.pillow(Image.open, image_path)
+        i = node_helpers.pillow(ImageOps.exif_transpose, i)
         if i.getbands() != ("R", "G", "B", "A"):
             if i.mode == 'I':
                 i = i.point(lambda i: i * (1 / 255))
