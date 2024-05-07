@@ -1,4 +1,4 @@
-from PIL import Image, ImageFile
+from PIL import ImageFile
 
 def conditioning_set_values(conditioning, values={}):
     c = []
@@ -10,15 +10,16 @@ def conditioning_set_values(conditioning, values={}):
 
     return c
 
-def open_image(path):
-    try :
-        ImageFile.LOAD_TRUNCATED_IMAGES = False
-        img = Image.open(path)
-    
-    except:
+
+def pillow(fn, arg):    
+    prev_value = None
+    try:
+        x = fn(arg)
+    except OSError:
+        prev_value = ImageFile.LOAD_TRUNCATED_IMAGES
         ImageFile.LOAD_TRUNCATED_IMAGES = True
-        img = Image.open(path)
-        
+        x = fn(arg)
     finally:
-        ImageFile.LOAD_TRUNCATED_IMAGES = False
-        return img
+        if prev_value is not None:
+            ImageFile.LOAD_TRUNCATED_IMAGES = prev_value
+        return x
