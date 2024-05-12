@@ -1461,13 +1461,31 @@ class LoadImage:
         
         output_images = []
         output_masks = []
+
+        w, h = None, None
+        
         for i in ImageSequence.Iterator(img):
             i = node_helpers.pillow(ImageOps.exif_transpose, i)
 
             if i.mode == 'I':
                 i = i.point(lambda i: i * (1 / 255))
             image = i.convert("RGB")
+
+            if len(output_images) == 0:
+                w = image.size[0]
+                h = image.size[1]
+            
+            if image.size[0] != w or image.size[1] != h:
+                continue
+            
             image = np.array(image).astype(np.float32) / 255.0
+            if len(output_images) == 0:
+                w = image.shape[1]
+                h = image.shape[0]
+            
+            if image.shape[1] != w or image.shape[0] != h:
+                continue
+            
             image = torch.from_numpy(image)[None,]
             if 'A' in i.getbands():
                 mask = np.array(i.getchannel('A')).astype(np.float32) / 255.0
