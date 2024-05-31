@@ -105,7 +105,7 @@ def attention_basic(q, k, v, heads, mask=None, attn_precision=None):
 
     # force cast to fp32 to avoid overflowing
     if attn_precision == torch.float32:
-        sim = einsum('b i d, b j d -> b i j', q.float(), k.float()) * scale
+        sim = einsum('b i d, b j d -> b i j', q.to(dtype=attn_precision, k.to(dtype=attn_precision) * scale
     else:
         sim = einsum('b i d, b j d -> b i j', q, k) * scale
 
@@ -262,7 +262,7 @@ def attention_split(q, k, v, heads, mask=None, attn_precision=None):
                 end = i + slice_size
                 if upcast:
                     with torch.autocast(enabled=False, device_type = 'cuda'):
-                        s1 = einsum('b i d, b j d -> b i j', q[:, i:end].float(), k.float()) * scale
+                        s1 = einsum('b i d, b j d -> b i j', q[:, i:end].to(dtype=attn_precision, k.to(dtype=attn_precision) * scale
                 else:
                     s1 = einsum('b i d, b j d -> b i j', q[:, i:end], k) * scale
 
